@@ -4,6 +4,7 @@ import '../model/word_quiz.dart';
 
 class AnimatedDots extends StatelessWidget {
   final int index;
+
   const AnimatedDots({super.key, required this.index});
 
   @override

@@ -1,1 +1,1 @@
-const duration = Duration(milliseconds: 2000);
+const duration = Duration(milliseconds: 1500);
