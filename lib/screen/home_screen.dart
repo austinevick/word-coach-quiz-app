@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:word_quiz_app/screen/score_screen.dart';
+import 'package:word_quiz_app/model/word_quiz.dart';
+import 'package:word_quiz_app/widget/animated_button.dart';
+import 'package:word_quiz_app/widget/animated_dot.dart';
+import 'package:word_quiz_app/widget/card_app_bar.dart';
 
-import '../model/word_quiz.dart';
+import '../constant.dart';
+import 'score_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,194 +15,158 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final controller = PageController();
   int index = 0;
   int score = 0;
   int correctAnswer = 0;
-  bool showIcon1 = false;
-  bool showIcon2 = false;
-  Color color1 = Colors.transparent;
-  Color color2 = Colors.transparent;
-  final duration = const Duration(milliseconds: 1000);
-  IconData icon = Icons.check;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff052714),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SafeArea(
+          child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Center(
           child: Container(
             alignment: Alignment.center,
-            height: 300,
+            height: 320,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color: Colors.white, width: 1.8),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      const Text(
-                        'Word coach',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w700),
-                      ),
-                      const Spacer(),
-                      const Text(
-                        'Score: ',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w700),
-                      ),
-                      Text(
-                        score.toString(),
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w700),
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                  Text(
-                    questions[index].question!,
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
-                  const Spacer(),
-                  AnimatedContainer(
-                    height: 45,
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    duration: const Duration(milliseconds: 1000),
-                    decoration: BoxDecoration(
-                        color: color1,
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(16)),
-                    child: MaterialButton(
-                        height: 45,
-                        minWidth: double.infinity,
-                        onPressed: () {
-                          setState(() {
-                            if (questions[index]
-                                .option1!
-                                .contains(questions[index].answer!)) {
-                              score += 10;
-                              correctAnswer++;
-                              color1 = Colors.green;
-                              icon = Icons.check;
-                            } else if (!questions[index]
-                                .option1!
-                                .contains(questions[index].answer!)) {
-                              color1 = Colors.red;
-                              icon = Icons.clear;
-                            }
-                            showIcon1 = true;
-                          });
-                          Future.delayed(
-                              duration,
-                              () => setState(() {
-                                    showIcon1 = false;
-                                    color1 = Colors.transparent;
-                                    if (index < questions.length - 1) {
-                                      index++;
-                                    } else if (index == questions.length - 1) {
-                                      showModalBottomSheet(
-                                          context: context,
-                                          builder: (ctx) => ScoreScreen(
-                                                score: score,
-                                                correctAnswer: correctAnswer,
-                                              ));
-                                    }
-                                  }));
-                        },
-                        padding: const EdgeInsets.all(0),
-                        child: AnimatedSwitcher(
-                            duration: duration,
-                            child: !showIcon1
-                                ? Text(questions[index].option1!)
-                                : Icon(icon))),
-                  ),
-                  const SizedBox(height: 16),
-                  AnimatedContainer(
-                    height: 45,
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    duration: const Duration(milliseconds: 1000),
-                    decoration: BoxDecoration(
-                        color: color2,
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(16)),
-                    child: MaterialButton(
-                        onPressed: () {
-                          setState(() {
-                            if (questions[index]
-                                .option2!
-                                .contains(questions[index].answer!)) {
-                              score += 10;
-                              correctAnswer++;
-                              color2 = Colors.green;
-                              icon = Icons.check;
-                            } else if (!questions[index]
-                                .option2!
-                                .contains(questions[index].answer!)) {
-                              color2 = Colors.red;
-                              icon = Icons.clear;
-                            }
-                            showIcon2 = true;
-                          });
-                          Future.delayed(
-                              duration,
-                              () => setState(() {
-                                    showIcon2 = false;
-                                    color2 = Colors.transparent;
-                                    if (index < questions.length - 1) {
-                                      index++;
-                                    } else if (index == questions.length - 1) {
-                                      showModalBottomSheet(
-                                          context: context,
-                                          builder: (ctx) => ScoreScreen(
-                                                score: score,
-                                                correctAnswer: correctAnswer,
-                                              ));
-                                    }
-                                  }));
-                        },
-                        minWidth: double.infinity,
-                        height: 45,
-                        padding: const EdgeInsets.all(0),
-                        child: AnimatedSwitcher(
-                            duration: duration,
-                            child: !showIcon2
-                                ? Text(questions[index].option2!)
-                                : Icon(icon))),
+                  CardAppBar(score: score),
+                  const Divider(thickness: 1.8, color: Colors.white60),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: PageView.builder(
+                        controller: controller,
+                        onPageChanged: (i) => setState(() => index = i),
+                        itemCount: questions.length,
+                        itemBuilder: ((context, i) {
+                          final q = questions[i];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  questions[i].question!,
+                                  style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                const Spacer(),
+                                const SizedBox(height: 10),
+                                AnimatedButton(
+                                    color: questions[0].color,
+                                    options: q.option1!,
+                                    onTap: () {
+                                      setState(() {
+                                        if (q.option1!
+                                            .contains(questions[i].answer!)) {
+                                          score += 10;
+                                          correctAnswer++;
+                                          questions[0].color = Colors.green;
+                                          questions[0].icon = Icons.check;
+                                        } else if (!questions[i]
+                                            .option1!
+                                            .contains(questions[i].answer!)) {
+                                          questions[0].color = Colors.red;
+                                          questions[0].icon = Icons.clear;
+                                        }
+                                        questions[0].showIcon = true;
+                                      });
+                                      Future.delayed(
+                                          duration,
+                                          () => setState(() {
+                                                questions[0].showIcon = false;
+                                                questions[0].color =
+                                                    Colors.transparent;
+                                                if (i < questions.length - 1) {
+                                                  controller.nextPage(
+                                                      duration: duration,
+                                                      curve: Curves.ease);
+                                                } else if (i ==
+                                                    questions.length - 1) {
+                                                  i = 0;
+                                                  Navigator.of(context).push(
+                                                      MaterialPageRoute(
+                                                          builder: (ctx) =>
+                                                              ScoreScreen(
+                                                                score: score,
+                                                                correctAnswer:
+                                                                    correctAnswer,
+                                                              )));
+                                                }
+                                              }));
+                                    },
+                                    icon: questions[0].icon,
+                                    showIcon: questions[0].showIcon),
+                                const SizedBox(height: 10),
+                                const Text('Or'),
+                                const SizedBox(height: 10),
+                                AnimatedButton(
+                                    color: questions[1].color,
+                                    options: questions[i].option2!,
+                                    onTap: () {
+                                      setState(() {
+                                        if (q.option1!
+                                            .contains(questions[i].answer!)) {
+                                          score += 10;
+                                          correctAnswer++;
+                                          questions[1].color = Colors.green;
+                                          questions[1].icon = Icons.check;
+                                        } else if (!questions[i]
+                                            .option1!
+                                            .contains(questions[i].answer!)) {
+                                          questions[1].color = Colors.red;
+                                          questions[1].icon = Icons.clear;
+                                        }
+                                        questions[1].showIcon = true;
+                                      });
+                                      Future.delayed(
+                                          duration,
+                                          () => setState(() {
+                                                questions[1].showIcon = false;
+                                                questions[1].color =
+                                                    Colors.transparent;
+                                                if (i < questions.length - 1) {
+                                                  controller.nextPage(
+                                                      duration: duration,
+                                                      curve: Curves.ease);
+                                                } else if (i ==
+                                                    questions.length - 1) {
+                                                  i = 0;
+                                                  Navigator.of(context).push(
+                                                      MaterialPageRoute(
+                                                          builder: (ctx) =>
+                                                              ScoreScreen(
+                                                                score: score,
+                                                                correctAnswer:
+                                                                    correctAnswer,
+                                                              )));
+                                                }
+                                              }));
+                                    },
+                                    icon: questions[1].icon,
+                                    showIcon: questions[1].showIcon),
+                              ],
+                            ),
+                          );
+                        })),
                   ),
                   const SizedBox(height: 25),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                        questions.length,
-                        (i) => Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4),
-                              child: AnimatedContainer(
-                                height: index == i ? 10 : 5,
-                                width: index == i ? 10 : 5,
-                                duration: duration,
-                                decoration: BoxDecoration(
-                                    color:
-                                        index == i ? Colors.red : Colors.grey,
-                                    borderRadius: BorderRadius.circular(16)),
-                              ),
-                            )),
-                  )
+                  AnimatedDots(index: index)
                 ],
               ),
             ),
           ),
         ),
-      ),
+      )),
     );
   }
 }

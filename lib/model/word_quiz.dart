@@ -1,10 +1,19 @@
+import 'package:flutter/animation.dart';
+import 'package:flutter/material.dart';
+
 class WordQuiz {
   final String? question;
   final String? answer;
   final String? option1;
   final String? option2;
+  Color color;
+  IconData icon;
+  bool showIcon;
 
   WordQuiz({
+    this.showIcon = false,
+    this.icon = Icons.check,
+    this.color = Colors.transparent,
     this.question,
     this.answer,
     this.option1,
